@@ -2,7 +2,7 @@
 #include "NavigationSystem.h"
 #include "Components/BoxComponent.h"
 #include "NavModifierComponent.h"
-#include "Volumes/FireArea_NavArea.h"
+#include "Volumes/SmokeArea_NavArea.h"
 
 AFireVolume::AFireVolume()
 {
@@ -36,7 +36,7 @@ AFireVolume::AFireVolume()
 
 	// Nav modifier that blocks entry
 	NavModifier = CreateDefaultSubobject<UNavModifierComponent>(TEXT("NavModifier"));
-	NavModifier->SetAreaClass(UFireArea_NavArea::StaticClass());
+	NavModifier->SetAreaClass(USmokeArea_NavArea::StaticClass());
 
 	InitialExtent = FireBox->GetUnscaledBoxExtent();
 }

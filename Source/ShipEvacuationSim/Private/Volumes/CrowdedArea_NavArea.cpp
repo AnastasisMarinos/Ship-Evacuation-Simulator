@@ -5,7 +5,7 @@
 
 UCrowdedArea_NavArea::UCrowdedArea_NavArea()
 {
-	DefaultCost = 1.0f;
+	DefaultCost = 4.0f;
 	FixedAreaEnteringCost = 3000.0f;    // Discourage entering from outside
 	DrawColor = FColor::Red;
 }

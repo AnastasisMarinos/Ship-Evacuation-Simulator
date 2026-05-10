@@ -1,6 +1,7 @@
 #include "Volumes/CrowdDensityVolume.h"
 #include "Components/BoxComponent.h"
 #include "NavModifierComponent.h"
+#include "SimulationInstance.h"
 #include "NavAreas/NavArea_Default.h"
 #include "Volumes/CrowdedArea_NavArea.h"
 #include "GameFramework/Character.h"
@@ -46,21 +47,22 @@ void ACrowdDensityVolume::CheckCongestion()
 	Volume->GetOverlappingActors(OverlappingActors, ACharacter::StaticClass());
 
 	const int32 AgentCount = OverlappingActors.Num();
-	if (AgentCount == 0)
+	float ErrorPercent = 0.f;
+	if (const UWorld* World = GetWorld())
 	{
-		if (bIsCongested)
+		if (USimulationInstance* SimInstance = Cast<USimulationInstance>(World->GetGameInstance()))
 		{
-			bIsCongested = false;
-			UpdateNavModifier(false);
-			UE_LOG(LogTemp, Warning, TEXT("CrowdDensityVolume '%s': no agents, marked uncongested"), *GetName());
+			ErrorPercent = SimInstance->GetCurrentErrorPercentage();
 		}
-		return;
 	}
+
+	// Apply the error (e.g., -0.2 = report 80% of agents)
+	const int32 ReportedAgentCount = FMath::Max(1, FMath::RoundToInt(AgentCount * (1.f + ErrorPercent)));
 
 	// Agent capsule assumptions
 	const float CapsuleRadius = 20.f;
 	const float CapsuleArea = PI * FMath::Square(CapsuleRadius);
-	const float OccupiedArea = AgentCount * CapsuleArea;
+	const float OccupiedArea = ReportedAgentCount * CapsuleArea;
 
 	// Volume area in 2D
 	const FVector BoxExtent = Volume->GetScaledBoxExtent();
@@ -82,14 +84,14 @@ void ACrowdDensityVolume::CheckCongestion()
 			SlowAgents++;
 		}
 	}
-	const float SlowRatio = static_cast<float>(SlowAgents) / AgentCount;
+	const float SlowRatio = static_cast<float>(SlowAgents) / ReportedAgentCount;
 
 	const bool bDenseEnough = AreaUsage >= AreaOccupancyThreshold;
 	const bool bSlowedEnough = SlowRatio >= PercentSlowedAgentsThreshold;
 
 	const bool bNowCongested = bDenseEnough && bSlowedEnough;
 
-	DisplayDebugStats(AreaUsage, SlowRatio, AgentCount);
+	DisplayDebugStats(AreaUsage, SlowRatio, ReportedAgentCount);
 	
 	if (bNowCongested != bIsCongested)
 	{
@@ -99,7 +101,7 @@ void ACrowdDensityVolume::CheckCongestion()
 		UE_LOG(LogTemp, Warning, TEXT("CrowdDensityVolume '%s' congestion changed: %s | Agents: %d | Area Usage: %.1f%% | Slow: %.1f%%"),
 			*GetName(),
 			bIsCongested ? TEXT("YES") : TEXT("NO"),
-			AgentCount,
+			ReportedAgentCount,
 			AreaUsage * 100.f,
 			SlowRatio * 100.f
 		);

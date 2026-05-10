@@ -6,8 +6,7 @@
 #include "Components/CapsuleComponent.h"
 
 // Constructor
-AAiCharacter::AAiCharacter(const FObjectInitializer& ObjectInitializer)
-    : Super(ObjectInitializer.SetDefaultSubobjectClass<UAgentMovementComponent>(CharacterMovementComponentName))
+AAiCharacter::AAiCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UAgentMovementComponent>(CharacterMovementComponentName))
 {
     PrimaryActorTick.bCanEverTick = true;
     PrimaryActorTick.TickInterval = FMath::FRandRange(0.2f, 0.5f);

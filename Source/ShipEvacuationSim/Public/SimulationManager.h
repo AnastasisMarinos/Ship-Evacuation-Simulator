@@ -22,7 +22,7 @@ protected:
 
 private:
 	int32 RunIndex = 0;
-	int32 TotalSimulations = 50;
+	int32 TotalSimulations = 24;
 	int32 MinutesElapsed = 1;
 
 	FString LogDirectoryPath;

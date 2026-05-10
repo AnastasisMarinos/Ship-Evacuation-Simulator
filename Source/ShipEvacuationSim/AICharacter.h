@@ -13,7 +13,7 @@ public:
 	AAiCharacter(const FObjectInitializer& ObjectInitializer);
 
 	// Public States
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bHasMustered = false;
 
 	UPROPERTY(BlueprintReadWrite)
